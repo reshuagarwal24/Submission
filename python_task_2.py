@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[46]:
+# In[202]:
 
 
 import pandas as pd
@@ -11,49 +11,37 @@ pd.options.display.max_rows = None
 
 # # Question 1: Distance Matrix Calculation
 
-# In[173]:
+# In[210]:
+
+
+data = pd.read_csv('dataset-3.csv')
+data
+
+
+# In[211]:
 
 
 def calculate_distance_matrix(file_path):
-    # Read the CSV file into a DataFrame
-    df = pd.read_csv(file_path, index_col = 'id_start')
-    df1 = pd.read_csv(file_path, index_col = 'id_end')
+    data = pd.read_csv(file_path)
+    new_row = pd.Series([1001400, 1001400, 0], index=data.columns)
+    df = pd.concat([pd.DataFrame([new_row]), data], ignore_index=True)
+    df
     
     # Create a pivot table with 'id_start', 'id_end', and 'distance'
     pivot_table = df.pivot_table(index='id_start', columns='id_end', values='distance', aggfunc='first', fill_value=0)
-    pivot_table.insert(0, '1001400', 0.0)
-    pivot_table = pivot_table.fillna(0)
-    pivot_table.iloc[1,0] = pivot_table.iloc[0,1]
+    pivot_table_transpose = df.pivot_table(index='id_end', columns='id_start', values='distance', aggfunc='first', fill_value=0)
     
-    pivot_table_transpose = df1.pivot_table(index='id_end', columns='id_start', values='distance', aggfunc='first', fill_value=0)
-    pivot_table_transpose.loc['1001400'] = 0.0
-    pivot_table_transpose.iloc[-1, 1] = pivot_table_transpose.iloc[0, 0]
-    last_row = df.iloc[-1]
-
-    # Shift all rows down by one position
-    df.iloc[1:] = df.iloc[:-1].values
-
-    # Assign the last row to the first position
-    df.iloc[0] = last_row
-   
-
-    # Reset index if needed
-    print(pivot_table_transpose)
-
-    
-#     new_row = pd.Series([, index=pivot_table_transpose.columns)
-
-#     pivot_table_transpose.loc[-1] = '1001400'
-#     pivot_table_transpose.index = pivot_table_transpose.index + 1
-#     pivot_table_transpose = pivot_table_transpose.sort_index()
-#     print(pivot_table)
-#     print(pivot_table_transpose)
-#     pivot_table_transpose = pivot_table_transpose.sort_index(ascending=True)
     distance_matrix = pivot_table + pivot_table_transpose
-    return distance_matrix
+    return distance_matrix.fillna(0)
 file_path = 'dataset-3.csv'
 distance_matrix = calculate_distance_matrix(file_path)
 print(distance_matrix)
+
+
+# In[ ]:
+
+
+
 
 
 # # Question 2: Unroll Distance Matrix
@@ -68,7 +56,7 @@ print(distance_matrix)
 # from the input DataFrame.
 
 
-# In[30]:
+# In[212]:
 
 
 import pandas as pd
@@ -93,7 +81,7 @@ print(unrolled_distance_matrix)
 
 # # Question 3: Finding IDs within Percentage Threshold
 
-# In[34]:
+# In[215]:
 
 
 import pandas as pd
@@ -125,7 +113,7 @@ print(result_ids)
 
 # # Question 4: Calculate Toll Rate
 
-# In[35]:
+# In[218]:
 
 
 import pandas as pd
@@ -138,11 +126,18 @@ def calculate_toll_rate(df):
     df['bus'] = df['distance'] * 2.2
     df['truck'] = df['distance'] * 3.6
 
-    return df
+    return df[df['distance'] != 0.0]
 
-# Example usage (using the unrolled_distance_matrix from the previous question):
 toll_rate_df = calculate_toll_rate(unrolled_distance_matrix)
 print(toll_rate_df)
+
+
+# # Question 5: Calculate Time-Based Toll Rates
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:
